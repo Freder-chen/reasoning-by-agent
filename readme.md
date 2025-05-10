@@ -4,13 +4,13 @@
 
 在观察o3、o4-mini的模型表现后，我更倾向于将它们视为Agent-as-a-Chatbot，或者更准确地说，是一种Reasoning-by-Agent的范式。它的核心思路是：通过调度器，将回答、推理、代码执行、搜索、图像识别等能力自然地整合为一个统一的智能体。在这种架构中，推理并不是通过Special Token显式触发，而是作为任务需求由系统自动调用。
 
-相比之下，像Qwen3那样依赖`<think>\n</think>`来“隐藏“推理过程，其实是一种人为的、不自然的解决方案。与其依赖 <think> 标签去“提示模型开始思考”，我们更应该从系统架构层面去支持推理能力。这意味着，不再把“推理”当成语言模板，而是当成一种明确的能力模块，由调度器（Agent Controller）在合适的上下文中主动调用。
+相比之下，像Qwen3那样依赖`<think>\n</think>`来“隐藏“推理过程，其实是一种人为的、不自然的解决方案。与其依赖`<think>`标签去“提示模型开始思考”，我们更应该从系统架构层面去支持推理能力。这意味着，不再把“推理”当成语言模板，而是当成一种明确的能力模块，由调度器（Agent Controller）在合适的上下文中主动调用。
 
 ![image.png](asserts/image.png)
 
 ---
 
-这种方式本质上是让LLM通过Agent框架给他自问自答的能力。我在https://github.com/openai/openai-agents-python找到了比较方便的实现。下面基于Qwen2.5-32B-Instruct和https://github.com/openai/openai-agents-python实现一个示例，让大家直观理解这种做法：
+这种方式本质上是让LLM通过Agent框架给他自问自答的能力。我在[openai-agents-python](https://github.com/openai/openai-agents-python)找到了比较方便的实现。下面基于Qwen2.5-32B-Instruct和openai-agents-python实现一个示例，让大家直观理解这种做法：
 
 ```python
 think_agent = Agent(
