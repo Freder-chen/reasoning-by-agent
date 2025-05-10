@@ -1,4 +1,4 @@
-# Reasoning by Agent: <think> Token Is Unnecessary
+# Reasoning by Agent: `<think>` Token Is Unnecessary
 
 随着Deepseek、Qwen3等模型陆续开源，大推理模型(Large Reasoning Models)正逐渐成为语言模型的新标准。其中，Deepseek-R1引入的`<think>`标签，试图通过新增Token显式标记推理过程，也被主流开源模型及框架迅速采纳和兼容。但实际上，我们并不需要`<think>`标签。
 
