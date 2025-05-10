@@ -122,4 +122,6 @@ print(result)
 
 ---
 
+如果大佬们觉得这个方法有效，希望出训练框架和模型。没钱训QAQ
+
 代码：[github](https://github.com/Freder-chen/reasoning-by-agent)
