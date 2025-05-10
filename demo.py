@@ -72,16 +72,16 @@ async def on_handoff(ctx: RunContextWrapper[None], input_data: ChatPlan):
 class ConversationAgents:
     """Container class for all agents used in the conversation."""
 
-    def __init__(self, base_url, api_key=None):
+    def __init__(self, model_name, base_url, api_key=None):
         self.vllm_client = AsyncOpenAI(
             base_url=base_url,
             api_key=api_key,
         )
-        self._initialize_agents()
+        self._initialize_agents(model_name)
     
-    def _initialize_agents(self):
+    def _initialize_agents(self, model_name):
         model_config = {
-            "model": "qwen_instruct",
+            "model": model_name,
             "openai_client": self.vllm_client,
         }
 
@@ -220,8 +220,9 @@ async def main():
     # user_question = "What is the integer value of $x$ in the arithmetic sequence $3^2, x, 3^4$?"
     
     agents = ConversationAgents(
+        model_name="qwen_instruct",
+        base_url="http://0.0.0.0:8009/v1",
         api_key="EMPTY",
-        base_url="http://0.0.0.0:8009/v1"
     )
     handler = ConversationHandler(agents)
     
