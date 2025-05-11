@@ -25,34 +25,25 @@ set_tracing_disabled(True)
 
 # System prompts
 THINK_SYSTEM_PROMPT = """
-You analyze the user's question and explore solutions.
-Reference previous messages to maintain consistent reasoning.
-Clearly separate solvable components from unresolved limitations.
-Outline your thought process briefly with key logical steps.
+Analyze the user's question and explore solutions. Reference prior messages for consistency. Separate solvable components from unresolved issues. Outline key steps briefly.
 """.strip()
 
 CRITIC_SYSTEM_PROMPT = """
-You evaluate the answer by answer agent and decide if it's good enough for the user's question.
-If it's not good enough, you provide feedback on what needs to be improved.
+Evaluate the answer's adequacy. Assign 'pass' or 'needs_improvement'. Provide specific actionable feedback if improvements are needed.
 
 Output format:
 {
-  "score": "pass"|"needs_improvement"|"fail",  // Choose one
+  "score": "pass"|"needs_improvement",  // Choose one
   "feedback": "..."  // Specific, actionable feedback
 }
 """.strip()
 
 ANSWER_SYSTEM_PROMPT = """
-Synthesize tool responses and prior discussion into a final user-facing answer.
-Directly address the original question with clear, concise language.
-Translate technical details into easily understandable terms while preserving critical solutions and conclusions.
+Synthesize tool responses and prior discussion into a clear, user-friendly answer. Address the original question directly, simplifying technical details without losing critical solutions.
 """.strip()
 
 PLAN_SYSTEM_PROMPT = """
-Coordinate problem-solving by first determining if the user's request requires multi-step handling.
-Identify priority sub-tasks or critical path items.
-Adjust task allocation based on critic feedback to ensure answer agent outputs are answer-ready.
-Invoke one tool at a time.
+Coordinate problem-solving by invoking one tool at a time as a helpful assistant.
 """.strip()
 
 
@@ -135,7 +126,7 @@ class ConversationHandler:
     def __init__(self, agents: ConversationAgents):
         self.agents = agents
 
-    async def async_chat(self, initial_input: str, max_round=5) -> str:
+    async def async_chat(self, initial_input: str, max_round=10) -> str:
         """Run the conversation loop until a satisfactory answer is reached."""
         # init message
         if isinstance(initial_input, str):
@@ -153,21 +144,21 @@ class ConversationHandler:
 
             # Check answer agent
             if result.last_agent is self.agents.answer_agent:
-                return result.final_output
-                # # Evaluate the final output using the critic agent
-                # evaluation_input = initial_input + [
-                #     {"content": f"{result.final_output}", "role": "assistant"},
-                #     {"content": f"Call critic agent and judge the answer", "role": "user"},
-                # ]
-                # status, feedback = await self._evaluate_output(self.agents.chat_agent, evaluation_input)
-                # if status == "pass":
-                #     return result.final_output
-                # elif status == "needs_improvement":
-                #     run_input = result.to_input_list() + [
-                #         {"content": f"Feedback: {feedback}", "role": "user"}
-                #     ]
-                # else:
-                #     raise NotImplementedError(f"The evaluation status `{status}` is not implemented.")
+                # return result.final_output
+                # Evaluate the final output using the critic agent
+                evaluation_input = initial_input + [
+                    {"content": f"{result.final_output}", "role": "assistant"},
+                    {"content": f"Call critic agent and judge the answer", "role": "user"},
+                ]
+                status, feedback = await self._evaluate_output(self.agents.chat_agent, evaluation_input)
+                if status == "pass":
+                    return result.final_output
+                elif status == "needs_improvement":
+                    run_input = result.to_input_list() + [
+                        {"content": f"Feedback: {feedback}", "role": "user"}
+                    ]
+                else:
+                    raise NotImplementedError(f"The evaluation status `{status}` is not implemented.")
 
             else:
                 run_input = result.to_input_list()
@@ -215,7 +206,8 @@ class ConversationHandler:
 
 async def main():
     # Example usage
-    user_question = "如何高效计算100！"
+    user_question = "计算100！"
+    # user_question = "如何高效计算100！"
     # user_question = "who are you?"
     # user_question = "What is the integer value of $x$ in the arithmetic sequence $3^2, x, 3^4$?"
     
